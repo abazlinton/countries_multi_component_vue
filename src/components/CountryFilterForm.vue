@@ -22,9 +22,7 @@ export default {
   props: ["countries", "parentAlpha3Code"],
   watch: {
     selectedAlpha3Code: function() {
-      if (this.parentAlpha3Code !== this.selectedAlpha3Code){
-        eventBus.$emit("country-selected", this.selectedAlpha3Code);
-      }
+      eventBus.$emit("country-selected", this.selectedAlpha3Code);
     },
     search: function(){
       eventBus.$emit("search-entered", this.search);
