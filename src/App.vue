@@ -1,8 +1,8 @@
 <template lang="html">
   <div>
     <h1>Countries</h1>
-    <country-filter-form :countries="countries" :parentAlpha3Code="currentAlpha3Code"/>
-    <country-detail :country="selectedCountry"/>
+    <country-filter-form :countries="filteredCountries" :parentAlpha3Code="currentAlpha3Code"/>
+    <country-detail :country="renderCountry"/>
   </div>
 </template>
 
@@ -15,7 +15,8 @@ export default {
   data() {
     return {
       countries: [],
-      currentAlpha3Code: "GBR"
+      currentAlpha3Code: "GBR",
+      searchTerm: ""
     };
   },
   components: {
@@ -23,12 +24,23 @@ export default {
     "country-detail": CountryDetail
   },
   computed: {
-    selectedCountry: function(){
+    renderCountry: function(){
       return this.countries.find(country => country.alpha3Code === this.currentAlpha3Code)
+    },
+    filteredCountries: function(){
+      const foundCountries = this.countries.filter(country => {
+        return country.name.toLowerCase().includes(this.searchTerm.toLowerCase())
+      })
+      if (foundCountries.length === 0) {
+        this.currentAlpha3Code = "???"
+        return [{name: "Not Found", alpha3Code: "???"}]
+      }
+      this.currentAlpha3Code = foundCountries[0].alpha3Code;
+      return foundCountries
     }
   },
   mounted: function() {
-    eventBus.$on('search-entered', nameToSearch => this.search(nameToSearch))
+    eventBus.$on('search-entered', searchTerm => this.searchTerm = searchTerm)
 
     eventBus.$on('country-selected', (alpha3Code) => {
       this.currentAlpha3Code = alpha3Code
@@ -40,17 +52,6 @@ export default {
         this.countries = countries
       })
   },
-  methods: {
-    search: function(nameToSearch) {
-      let foundCountry = this.countries.find(country => {
-        return (
-          country.name.toLowerCase().indexOf(nameToSearch.toLowerCase()) > -1
-        );
-      });
-      if (!foundCountry) return;
-      this.currentAlpha3Code = foundCountry.alpha3Code;
-    }
-  }
 };
 </script>
 
